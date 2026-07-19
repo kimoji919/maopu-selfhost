@@ -22,6 +22,22 @@ https://你的-natapp-域名/maopu/api/...    → 猫谱 API（127.0.0.1:8788）
 
 健康检查地址是 `https://你的-natapp-域名/maopu/api/healthz`。
 
+### 重启后自动恢复
+
+运行 `selfhost/scripts/install-user-services.sh` 安装用户级 systemd 服务。完成 `.env` 后启用 MongoDB 和 API：
+
+```bash
+systemctl --user enable --now maopu-mongodb maopu-api
+```
+
+只有原 8787 服务移到 8789 后，才启用路径网关：
+
+```bash
+systemctl --user enable --now maopu-gateway
+```
+
+如果本机重启后用户服务没有自动启动，需要管理员执行 `loginctl enable-linger kimoji` 一次。
+
 ## Docker 启动（可选）
 
 1. 复制 `.env.example` 为 `.env`，填写 MongoDB 密码、JWT 密钥和微信小程序凭据。

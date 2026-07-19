@@ -1,0 +1,16 @@
+[Unit]
+Description=Maopu self-hosted API
+After=network.target maopu-mongodb.service
+Wants=maopu-mongodb.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/workspace/zhongdamaopu/selfhost/api
+EnvironmentFile=%h/workspace/zhongdamaopu/selfhost/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

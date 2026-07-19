@@ -1,0 +1,13 @@
+[Unit]
+Description=Maopu local MongoDB
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/workspace/zhongdamaopu
+ExecStart=%h/workspace/zhongdamaopu/selfhost/.runtime/mongodb/bin/mongod --dbpath %h/workspace/zhongdamaopu/selfhost/.runtime/mongo-data --bind_ip 127.0.0.1 --port 27017
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
