@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "check": "node --check src/index.js && node --check src/runtime.js && node --check src/import-data.js",
+    "bootstrap-db": "node src/bootstrap-db.js",
+    "check": "node --check src/index.js && node --check src/runtime.js && node --check src/import-data.js && node --check src/bootstrap-db.js",
     "test": "NODE_ENV=development DEV_OPENID=test-openid MONGO_URL=mongodb://unused/maopu JWT_SECRET=12345678901234567890123456789012 node test/smoke.js"
   },
   "dependencies": {

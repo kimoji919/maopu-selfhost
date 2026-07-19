@@ -6,16 +6,17 @@
 
 当前机器的 8787 已被其他服务监听，不能再直接绑定猫谱 API。让猫谱监听仅本机可访问的 **8788**，再由 Nginx 按路径转发：
 
-1. 复制 `selfhost/.env.example` 为 `selfhost/.env`，填写 `MONGO_URL`、`JWT_SECRET` 和微信小程序密钥。
-2. 在 `selfhost/api` 执行 `npm ci`，然后启动：`npm start`。服务会自动读取 `selfhost/.env`。
-3. 将 `nginx-maopu-location.example.conf` 的 `location` 块加入 NATAPP 所转发的 Nginx `server` 块，执行 `nginx -t` 后重载 Nginx。
-4. 将 NATAPP 的本地目标改为该 Nginx 监听端口（通常为 80），而不是旧服务的 8787。
-5. 小程序 `miniprogram/selfhost.config.js` 写为 `https://你的-natapp-域名/maopu/api`，并将域名配置为微信小程序 request 合法域名。
+1. 运行 `selfhost/scripts/start-mongodb.sh`。本机 MongoDB 数据保存在 `selfhost/.runtime/mongo-data`，只监听 `127.0.0.1:27017`。
+2. 复制 `selfhost/.env.example` 为 `selfhost/.env`，填写 `JWT_SECRET` 和微信小程序密钥；本机 MongoDB 使用示例中的 `MONGO_URL`。
+3. 在 `selfhost/api` 执行 `npm ci && npm run bootstrap-db`，然后启动：`npm start`。服务会自动读取 `selfhost/.env`。
+4. 将原 FeishuWebChat 服务由 8787 改为 8789；服务自身所有者需执行该步骤。随后在 `selfhost/gateway` 执行 `npm start`，接管器会监听 8787。
+5. NATAPP 继续指向 8787，无须改地址。接管器会将 `/maopu/api/` 转给猫谱，将其余路径转给 8789 的原服务。
+6. 小程序 `miniprogram/selfhost.config.js` 写为 `https://你的-natapp-域名/maopu/api`，并将域名配置为微信小程序 request 合法域名。
 
 这样同一个公网地址会按路径复用：
 
 ```text
-https://你的-natapp-域名/                 → 现有服务（127.0.0.1:8787）
+https://你的-natapp-域名/                 → 现有服务（由网关转到 127.0.0.1:8789）
 https://你的-natapp-域名/maopu/api/...    → 猫谱 API（127.0.0.1:8788）
 ```
 

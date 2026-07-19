@@ -18,6 +18,7 @@ project.private.config.json
 miniprogram/appSecret.js
 miniprogram/selfhost.config.js
 selfhost/.env
+selfhost/.runtime/
 .secret.yaml
 miniprogram/signKey.js
 .app.yaml
