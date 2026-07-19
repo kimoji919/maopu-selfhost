@@ -1,0 +1,5 @@
+# Replace maopu.example.com with your own domain. Caddy obtains and renews TLS
+# certificates automatically when ports 80/443 are reachable from the internet.
+maopu.example.com {
+  reverse_proxy 127.0.0.1:3000
+}

@@ -5,6 +5,10 @@
 
 
 module.exports = {
+  // 后端模式：selfhost 使用本机 Node.js + MongoDB；emas 保留为回滚选项。
+  backend_mode: "selfhost",
+  // 复制 selfhost.config.demo.js 为 selfhost.config.js 后自动读取公网 HTTPS API 地址。
+  api_base_url: (() => { try { return require('./selfhost.config').api_base_url; } catch (e) { return ''; } })(),
   // 版本号
   app_version: "v1.19.6",
   // 小程序appid

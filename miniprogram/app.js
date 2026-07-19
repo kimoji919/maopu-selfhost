@@ -1,34 +1,41 @@
 import { checkUpdateVersion, getDateWithDiffHours } from './utils/utils';
 import { app_version } from "./config";
 import { ensureCos } from './utils/common';
-import { app_id, space_id, space_secret, space_endpoint } from './config'
+import { app_id, space_id, space_secret, space_endpoint, backend_mode, api_base_url } from './config'
 import eventBus from './utils/eventBus';
 import { createMockMpServerless } from './utils/demo';
 
 let mpServerless;
 let demoMode = false;
 
-// 尝试加载 EMAS SDK（npm 包可能未安装）
-try {
-  var MPServerless = require('@alicloud/mpserverless-sdk');
-  mpServerless = new MPServerless({
-    uploadFile: wx.uploadFile,
-    request: wx.request,
-    getAuthCode: wx.login,
-    getFileInfo: wx.getFileInfo,
-    getImageInfo: wx.getImageInfo,
-  }, {
-    appId: app_id,
-    spaceId: space_id,
-    clientSecret: space_secret,
-    endpoint: space_endpoint,
-  });
+if (backend_mode === 'selfhost') {
+  const { SelfHostedServerless } = require('./utils/selfHostedServerless');
+  mpServerless = new SelfHostedServerless({ baseUrl: api_base_url });
   mpServerless.init();
-  console.log('EMAS 初始化成功');
-} catch (e) {
-  console.warn('EMAS SDK 未安装或初始化失败，进入离线 Demo 模式:', e.message);
-  mpServerless = createMockMpServerless();
-  demoMode = true;
+  console.log('自托管后端初始化完成');
+} else {
+  // EMAS 保留为回滚选项；新部署默认使用 selfhost。
+  try {
+    var MPServerless = require('@alicloud/mpserverless-sdk');
+    mpServerless = new MPServerless({
+      uploadFile: wx.uploadFile,
+      request: wx.request,
+      getAuthCode: wx.login,
+      getFileInfo: wx.getFileInfo,
+      getImageInfo: wx.getImageInfo,
+    }, {
+      appId: app_id,
+      spaceId: space_id,
+      clientSecret: space_secret,
+      endpoint: space_endpoint,
+    });
+    mpServerless.init();
+    console.log('EMAS 初始化成功');
+  } catch (e) {
+    console.warn('EMAS SDK 未安装或初始化失败，进入离线 Demo 模式:', e.message);
+    mpServerless = createMockMpServerless();
+    demoMode = true;
+  }
 }
 
 // Demo 模式：全局拦截 wx.downloadFile / wx.saveFile / wx.getFileSystemManager 等

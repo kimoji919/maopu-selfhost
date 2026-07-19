@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo:7.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: maopu
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-maopu}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?set MONGO_ROOT_PASSWORD in .env}
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --username $$MONGO_INITDB_ROOT_USERNAME --password $$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin --eval 'db.runCommand({ ping: 1 }).ok' | grep 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ..
+      dockerfile: selfhost/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      API_BASE_PATH: ${API_BASE_PATH:-/maopu/api}
+      MONGO_URL: mongodb://${MONGO_ROOT_USERNAME:-maopu}:${MONGO_ROOT_PASSWORD}@mongo:27017/maopu?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      WECHAT_APPID: ${WECHAT_APPID:-}
+      WECHAT_APPSECRET: ${WECHAT_APPSECRET:-}
+      # DEV_OPENID is only allowed when NODE_ENV is not production.
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:${API_PORT:-3000}:3000"
+
+volumes:
+  mongo-data:
